@@ -11,7 +11,7 @@ Use the method `addProp(propName, value)` to add the desired properties.
     loCatJson.addProp('name', 'Fred')
     loCatJson.addProp('age', 2)
 
-You can even add a **FoxJson** object as a prop.
+You can even add another **FoxJson** object as a prop.
 
     loKidJson = FoxJson()
     loKidJson.addProp('name', 'John')
