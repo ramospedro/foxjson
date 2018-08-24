@@ -54,7 +54,7 @@ DEFINE CLASS FoxJson as Custom
 			MESSAGEBOX('All tests passed!')
 		ENDIF
 	ENDPROC
-	
+
 	* Tests
 	
 	FUNCTION Test_ParseValue
