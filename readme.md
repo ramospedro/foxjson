@@ -6,7 +6,7 @@ Call the function `FoxJson()` itself to create an instance of a **FoxJson** obje
 
     loCatJson = FoxJson()
 
-Use the class method `addProp(propName, value)` to add the desired properties.
+Use the method `addProp(propName, value)` to add the desired properties.
 
     loCatJson.addProp('name', 'Fred')
     loCatJson.addProp('age', 2)
