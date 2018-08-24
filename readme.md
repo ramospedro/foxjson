@@ -17,12 +17,12 @@ You can even add a **FoxJson** object as a prop.
     loKidJson.addProp('name', 'John')
     loKidJson.addProp('pet', loCatJson)
 
-Getting the JSON string is just as easy an a `getJson()` call.
+Getting the JSON string is just as easy a `getJson()` call.
 
     ? loKidJson.getJson()
     // { "name": "John", "pet": { "name": "Fred", "age": 2 } }
 
-## Supported Values (So far)
+## Supported Values (so far)
 - Integer
 - String
 - FoxJson Object
