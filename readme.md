@@ -28,7 +28,7 @@ Getting the JSON string is just as easy an a `getJson()` call.
 - FoxJson Object
 
 ## Testing
-- The **FoxJson** class is self-tested. Although it doesn't run the tests for default (for practical reasons), one can run the tests by calling `FoxJson(.T.)`. Passing `.T.` to the constructor, makes the `init` method run the tests and output the result (or throw the errors) on the screen.
+- The **FoxJson** class is self-tested. Although it doesn't run the tests by default (for practical reasons), one can run the tests by calling `FoxJson(.T.)`. Passing `.T.` to the constructor, makes the `init` method run the tests and output the result (or throw the errors) on the screen.
 
 
 
