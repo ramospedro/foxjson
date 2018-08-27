@@ -39,7 +39,7 @@ DEFINE CLASS FoxJson as Custom
 		ENDCASE
 	ENDFUNC
 	
-	FUNCTION addProp(pcField, pvValue)
+	FUNCTION setProp(pcField, pvValue)
 		loNewProp = CREATEOBJECT('Empty')
 		ADDPROPERTY(loNewProp, 'name', pcField)
 		ADDPROPERTY(loNewProp, 'value', pvValue)
@@ -52,10 +52,10 @@ DEFINE CLASS FoxJson as Custom
 		IF plTesting
 			this.Test_ParseValue()
 			this.Test_Initial_Json_Empty()
-			this.Test_AddProp_Integer()
-			this.Test_AddProp_String()
-			this.Test_AddProp_FoxJsonObject()
-			this.Test_AddProp_UnsupportedObject()
+			this.Test_SetProp_Integer()
+			this.Test_SetProp_String()
+			this.Test_SetProp_FoxJsonObject()
+			this.Test_SetProp_UnsupportedObject()
 			MESSAGEBOX('All tests passed!')
 		ENDIF
 	ENDPROC
@@ -84,7 +84,7 @@ DEFINE CLASS FoxJson as Custom
 			ENDIF
 			
 			loFoxJsonObj = CREATEOBJECT('FoxJson')
-			loFoxJsonObj.addProp("name", "test")
+			loFoxJsonObj.setProp("name", "test")
 			loExpectedJsonObjectValue = '{ "name": "test" }'
 			IF loFoxJson.parseValue(loFoxJsonObj) != loExpectedJsonObjectValue 
 				ERROR('Parse value should parse FoxJsonObjects: ' + '{ "name": "test" }' + ' should be equal to '+ loFoxJson.parseValue(loFoxJsonObj))
@@ -111,18 +111,18 @@ DEFINE CLASS FoxJson as Custom
 		ENDTRY	
 	ENDFUNC
 	
-	FUNCTION Test_AddProp_Integer
+	FUNCTION Test_SetProp_Integer
 		TRY
 			loFoxJson = CREATEOBJECT('FoxJson')
 			
 			lcExpectedJson = '{ "id": 10, "age": 20, "year": 2018 }'
 			
-			loFoxJson.addProp("id", 10)			
-			loFoxJson.addProp("age", 20)
-			loFoxJson.addProp("year", 2018)
+			loFoxJson.setProp("id", 10)			
+			loFoxJson.setProp("age", 20)
+			loFoxJson.setProp("year", 2018)
 			
 			IF loFoxJson.getJson() != lcExpectedJson 
-				ERROR('AddProp_Integer failed: ' + loFoxJson.getJson())
+				ERROR('SetProp_Integer failed: ' + loFoxJson.getJson())
 			ENDIF
 			
 		CATCH
@@ -130,42 +130,42 @@ DEFINE CLASS FoxJson as Custom
 		ENDTRY	
 	ENDFUNC
 	
-	FUNCTION Test_AddProp_String
+	FUNCTION Test_SetProp_String
 		TRY
 			loFoxJson = CREATEOBJECT('FoxJson')
 			
 			lcExpectedJson = '{ "name": "Robert", "city": "London", "country": "England" }'
 			
-			loFoxJson.addProp("name", "Robert")			
-			loFoxJson.addProp("city", "London")
-			loFoxJson.addProp("country", "England")
+			loFoxJson.setProp("name", "Robert")			
+			loFoxJson.setProp("city", "London")
+			loFoxJson.setProp("country", "England")
 			
 			IF loFoxJson.getJson() != lcExpectedJson 
-				ERROR('AddProp_String failed: ' + loFoxJson.getJson())
+				ERROR('SetProp_String failed: ' + loFoxJson.getJson())
 			ENDIF
 		CATCH
 			THROW
 		ENDTRY
 	ENDFUNC
 
-	FUNCTION Test_AddProp_FoxJsonObject
+	FUNCTION Test_SetProp_FoxJsonObject
 		TRY
 			loFoxJsonCar = CREATEOBJECT('FoxJson')
-			loFoxJsonCar.addProp("model", "camaro")
-			loFoxJsonCar.addProp("year", 2017)
+			loFoxJsonCar.setProp("model", "camaro")
+			loFoxJsonCar.setProp("year", 2017)
 			
 			loFoxJsonBike = CREATEOBJECT('FoxJson')
-			loFoxJsonBike.addProp("model", "R6")
-			loFoxJsonBike.addProp("year", 2016)
+			loFoxJsonBike.setProp("model", "R6")
+			loFoxJsonBike.setProp("year", 2016)
 			
 			lcExpectedJson = '{ "car": { "model": "camaro", "year": 2017 }, "bike": { "model": "R6", "year": 2016 } }'
 			
 			loFoxJson = CREATEOBJECT('FoxJson')
-			loFoxJson.addProp("car", loFoxJsonCar)
-			loFoxJson.addProp("bike", loFoxJsonBike)
+			loFoxJson.setProp("car", loFoxJsonCar)
+			loFoxJson.setProp("bike", loFoxJsonBike)
 			
 			IF loFoxJson.getJson() != lcExpectedJson 
-				ERROR('AddProp_FoxJsonObject failed: ' + loFoxJson.getJson())
+				ERROR('SetProp_FoxJsonObject failed: ' + loFoxJson.getJson())
 			ENDIF
 			
 		CATCH
@@ -173,14 +173,14 @@ DEFINE CLASS FoxJson as Custom
 		ENDTRY
 	ENDFUNC
 
-	FUNCTION Test_AddProp_UnsupportedObject
+	FUNCTION Test_SetProp_UnsupportedObject
 		TRY
 			loFoxJson = CREATEOBJECT('FoxJson')
-			loFoxJson.addProp("notSupported", CREATEOBJECT('Empty'))
+			loFoxJson.setProp("notSupported", CREATEOBJECT('Empty'))
 			
 			lcExpectedJson = '{ "notSupported": "null" }'
 			IF loFoxJson.getJson() != lcExpectedJson 
-				ERROR('AddProp_FoxJsonObject failed: ' + loFoxJson.getJson())
+				ERROR('SetProp_FoxJsonObject failed: ' + loFoxJson.getJson())
 			ENDIF
 		CATCH
 			THROW
