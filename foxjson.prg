@@ -52,7 +52,7 @@ DEFINE CLASS FoxJson as Custom
 		IF plTesting
 			this.Test_ParseValue()
 			this.Test_Initial_Json_Empty()
-			this.Test_SetProp_Integer()
+			this.Test_SetProp_Number()
 			this.Test_SetProp_String()
 			this.Test_SetProp_FoxJsonObject()
 			this.Test_SetProp_UnsupportedObject()
@@ -111,18 +111,20 @@ DEFINE CLASS FoxJson as Custom
 		ENDTRY	
 	ENDFUNC
 	
-	FUNCTION Test_SetProp_Integer
+	FUNCTION Test_SetProp_Number
 		TRY
 			loFoxJson = CREATEOBJECT('FoxJson')
 			
-			lcExpectedJson = '{ "id": 10, "age": 20, "year": 2018 }'
+			lcExpectedJson = '{ "id": 10, "age": 20, "year": 2018, "twoRelevantDecimals": 20.45, "noRelevantDecimals": 20 }'
 			
 			loFoxJson.setProp("id", 10)			
 			loFoxJson.setProp("age", 20)
 			loFoxJson.setProp("year", 2018)
+			loFoxJson.setProp("twoRelevantDecimals", 20.450)
+			loFoxJson.setProp("noRelevantDecimals", 20.00)
 			
 			IF loFoxJson.getJson() != lcExpectedJson 
-				ERROR('SetProp_Integer failed: ' + loFoxJson.getJson())
+				ERROR('SetProp_Number failed. Numbers should be added including only relevant decimals: ' + loFoxJson.getJson())
 			ENDIF
 			
 		CATCH
