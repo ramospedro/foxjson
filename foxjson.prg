@@ -19,7 +19,12 @@ DEFINE CLASS FoxJson as Custom
 	FUNCTION parseValue(pvValue)
 		DO CASE
 			CASE VARTYPE(pvValue) == 'N'
-				RETURN ALLTRIM(STR(pvValue))
+				lcNumber = STR(pvValue, 20, 6)
+				lnPoint = AT('.', lcNumber)
+				lcLeftSide = ALLTRIM(LEFT(lcNumber, lnPoint - 1))
+				lcRightSide = ALLTRIM(SUBSTR(lcNumber, lnPoint), 1, ' ', '0')
+				lcParsedNumber = ALLTRIM(lcLeftSide + lcRightSide, 1, '.')
+				RETURN lcParsedNumber
 			CASE VARTYPE(pvValue) == 'C'
 				RETURN '"' + pvValue + '"'
 			CASE VARTYPE(pvValue) == 'O'
@@ -61,9 +66,10 @@ DEFINE CLASS FoxJson as Custom
 		TRY
 			loFoxJson = CREATEOBJECT('FoxJson')
 			
-			lcExpectedIntegerValue = '10'
-			IF loFoxJson.parseValue(10) != lcExpectedIntegerValue
-				ERROR('Parse value should parse integers')
+			lcExpectedIntegerValue = '102000'
+			lcParsedValue = loFoxJson.parseValue(102000)
+			IF lcParsedValue != lcExpectedIntegerValue
+				ERROR('Parse value should parse integers: ' + lcParsedValue + ' should be equal to ' + lcExpectedIntegerValue)
 			ENDIF
 			
 			lcExpectedFloatValue = '234514.564319'
