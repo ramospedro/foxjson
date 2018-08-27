@@ -66,6 +66,12 @@ DEFINE CLASS FoxJson as Custom
 				ERROR('Parse value should parse integers')
 			ENDIF
 			
+			lcExpectedFloatValue = '234514.564319'
+			lcParsedValue = loFoxJson.parseValue(234514.564319)
+			IF lcParsedValue != lcExpectedFloatValue
+				ERROR('Parse values shoud parse floats: ' + lcParsedValue + ' should be equal to ' + lcExpectedFloatValue)
+			ENDIF
+			
 			lcExpectedStringValue = '"test"'
 			IF loFoxJson.parseValue("test") != lcExpectedStringValue
 				ERROR('Parse value should parse strings: ' + '"test"' + ' should be equal to '+ loFoxJson.parseValue("test"))
