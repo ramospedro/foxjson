@@ -6,16 +6,16 @@ Call the function `FoxJson()` itself to create an instance of a **FoxJson** obje
 
     loCatJson = FoxJson()
 
-Use the method `addProp(propName, value)` to add the desired properties.
+Use the method `setProp(propName, value)` to add (or set) the desired properties.
 
-    loCatJson.addProp('name', 'Fred')
-    loCatJson.addProp('age', 2)
+    loCatJson.setProp('name', 'Fred')
+    loCatJson.setProp('age', 2)
 
 You can even add another **FoxJson** object as a prop.
 
     loKidJson = FoxJson()
-    loKidJson.addProp('name', 'John')
-    loKidJson.addProp('pet', loCatJson)
+    loKidJson.setProp('name', 'John')
+    loKidJson.setProp('pet', loCatJson)
 
 Getting the JSON string is just as easy a `getJson()` call.
 
@@ -23,7 +23,7 @@ Getting the JSON string is just as easy a `getJson()` call.
     // { "name": "John", "pet": { "name": "Fred", "age": 2 } }
 
 ## Supported Values (so far)
-- Integer
+- Number
 - String
 - FoxJson Object
 
