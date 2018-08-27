@@ -40,10 +40,14 @@ DEFINE CLASS FoxJson as Custom
 	ENDFUNC
 	
 	FUNCTION setProp(pcField, pvValue)
+		llPropExists = this.oProps.GetKey(pcField) > 0
+		IF llPropExists
+			this.oProps.Remove(pcField)
+		ENDIF
 		loNewProp = CREATEOBJECT('Empty')
 		ADDPROPERTY(loNewProp, 'name', pcField)
 		ADDPROPERTY(loNewProp, 'value', pvValue)
-		this.oProps.add(loNewProp)
+		this.oProps.add(loNewProp, pcField)
 	ENDFUNC
 	
 	PROCEDURE INIT(plTesting)
@@ -56,6 +60,7 @@ DEFINE CLASS FoxJson as Custom
 			this.Test_SetProp_String()
 			this.Test_SetProp_FoxJsonObject()
 			this.Test_SetProp_UnsupportedObject()
+			this.Test_SetProp_No_Duplicates()
 			MESSAGEBOX('All tests passed!')
 		ENDIF
 	ENDPROC
@@ -183,6 +188,24 @@ DEFINE CLASS FoxJson as Custom
 			lcExpectedJson = '{ "notSupported": "null" }'
 			IF loFoxJson.getJson() != lcExpectedJson 
 				ERROR('SetProp_FoxJsonObject failed: ' + loFoxJson.getJson())
+			ENDIF
+		CATCH
+			THROW
+		ENDTRY
+	ENDFUNC
+
+	FUNCTION Test_SetProp_No_Duplicates
+		TRY 
+			loFoxJson = CREATEOBJECT('FoxJson')
+			loFoxJson.setProp('propA', 1)
+			loFoxJson.setProp('propB', 'a')
+			loFoxJson.setProp('propA', 'A')
+			loFoxJson.setProp('propB', 2)
+			
+			lcExpectedJson = '{ "propA": "A", "propB": 2 }'
+			
+			IF loFoxJson.getJson() != lcExpectedJson 
+				ERROR('Test_SetProp_No_Duplicates failed: ' + loFoxJson.getJson() + ' should be equals to ' + lcExpectedJson)
 			ENDIF
 		CATCH
 			THROW
