@@ -53,7 +53,7 @@ DEFINE CLASS FoxJson as Custom
 	PROCEDURE INIT(plTesting)
 		this.oProps = CREATEOBJECT('Collection')
 		
-		IF plTesting
+		IF plTesting AND SET("Asserts") == 'ON'
 			this.Test_ParseValue()
 			this.Test_Initial_Json_Empty()
 			this.Test_SetProp_Number()
@@ -61,6 +61,7 @@ DEFINE CLASS FoxJson as Custom
 			this.Test_SetProp_FoxJsonObject()
 			this.Test_SetProp_UnsupportedObject()
 			this.Test_SetProp_No_Duplicates()
+			
 			MESSAGEBOX('All tests passed!')
 		ENDIF
 	ENDPROC
@@ -68,148 +69,107 @@ DEFINE CLASS FoxJson as Custom
 	* Tests
 	
 	FUNCTION Test_ParseValue
-		TRY
-			loFoxJson = CREATEOBJECT('FoxJson')
+		loFoxJson = CREATEOBJECT('FoxJson')
 			
-			lcExpectedIntegerValue = '102000'
-			lcParsedValue = loFoxJson.parseValue(102000)
-			IF lcParsedValue != lcExpectedIntegerValue
-				ERROR('Parse value should parse integers: ' + lcParsedValue + ' should be equal to ' + lcExpectedIntegerValue)
-			ENDIF
+		lcExpectedIntegerValue = '102000'
+		lcParsedValue = loFoxJson.parseValue(102000)
+		ASSERT lcParsedValue == lcExpectedIntegerValue ;
+			MESSAGE 'Parse value should parse integers: ' + lcParsedValue + ' should be equal to ' + lcExpectedIntegerValue
 			
-			lcExpectedFloatValue = '234514.564319'
-			lcParsedValue = loFoxJson.parseValue(234514.564319)
-			IF lcParsedValue != lcExpectedFloatValue
-				ERROR('Parse values shoud parse floats: ' + lcParsedValue + ' should be equal to ' + lcExpectedFloatValue)
-			ENDIF
 			
-			lcExpectedStringValue = '"test"'
-			IF loFoxJson.parseValue("test") != lcExpectedStringValue
-				ERROR('Parse value should parse strings: ' + '"test"' + ' should be equal to '+ loFoxJson.parseValue("test"))
-			ENDIF
+		lcExpectedFloatValue = '234514.564319'
+		lcParsedValue = loFoxJson.parseValue(234514.564319)
+		ASSERT lcParsedValue == lcExpectedFloatValue ;
+			MESSAGE 'Parse values shoud parse floats: ' + lcParsedValue + ' should be equal to ' + lcExpectedFloatValue
 			
-			loFoxJsonObj = CREATEOBJECT('FoxJson')
-			loFoxJsonObj.setProp("name", "test")
-			loExpectedJsonObjectValue = '{ "name": "test" }'
-			IF loFoxJson.parseValue(loFoxJsonObj) != loExpectedJsonObjectValue 
-				ERROR('Parse value should parse FoxJsonObjects: ' + '{ "name": "test" }' + ' should be equal to '+ loFoxJson.parseValue(loFoxJsonObj))
-			ENDIF
+		lcExpectedStringValue = '"test"'
+		ASSERT loFoxJson.parseValue("test") == lcExpectedStringValue ;
+			MESSAGE 'Parse value should parse strings: ' + '"test"' + ' should be equal to '+ loFoxJson.parseValue("test")
 			
-			lcExpectedNullValue = '"null"'
-			IF loFoxJson.parseValue(CREATEOBJECT('Empty')) != lcExpectedNullValue
-				ERROR('Parse value should parse unsupported types into null values')
-			ENDIF
-		CATCH
-			THROW
-		ENDTRY
+		loFoxJsonObj = CREATEOBJECT('FoxJson')
+		loFoxJsonObj.setProp("name", "test")
+		loExpectedJsonObjectValue = '{ "name": "test" }'
+		ASSERT loFoxJson.parseValue(loFoxJsonObj) == loExpectedJsonObjectValue ;
+			MESSAGE 'Parse value should parse FoxJsonObjects: ' + '{ "name": "test" }' + ' should be equal to '+ loFoxJson.parseValue(loFoxJsonObj)
+			
+		lcExpectedNullValue = '"null"'
+		ASSERT loFoxJson.parseValue(CREATEOBJECT('Empty')) == lcExpectedNullValue ;
+			MESSAGE 'Parse value should parse unsupported types into null values'
+				
 	ENDFUNC
 	
 	FUNCTION Test_Initial_Json_Empty
-		TRY
-			loFoxJson = CREATEOBJECT('FoxJson')
-			lcExpectedInitialJson = '{ }'
-			IF loFoxJson.getJson() != lcExpectedInitialJson
-				ERROR('Initial default json should be an empty object')
-			ENDIF
-		CATCH
-			THROW
-		ENDTRY	
+		loFoxJson = CREATEOBJECT('FoxJson')
+		lcExpectedInitialJson = '{ }'
+		ASSERT loFoxJson.getJson() == lcExpectedInitialJson ;
+			MESSAGE 'Initial default json should be an empty object'
 	ENDFUNC
 	
 	FUNCTION Test_SetProp_Number
-		TRY
-			loFoxJson = CREATEOBJECT('FoxJson')
-			
-			lcExpectedJson = '{ "id": 10, "age": 20, "year": 2018, "twoRelevantDecimals": 20.45, "noRelevantDecimals": 20 }'
-			
-			loFoxJson.setProp("id", 10)			
-			loFoxJson.setProp("age", 20)
-			loFoxJson.setProp("year", 2018)
-			loFoxJson.setProp("twoRelevantDecimals", 20.450)
-			loFoxJson.setProp("noRelevantDecimals", 20.00)
-			
-			IF loFoxJson.getJson() != lcExpectedJson 
-				ERROR('SetProp_Number failed. Numbers should be added including only relevant decimals: ' + loFoxJson.getJson())
-			ENDIF
-			
-		CATCH
-			THROW
-		ENDTRY	
+		loFoxJson = CREATEOBJECT('FoxJson')
+		
+		lcExpectedJson = '{ "id": 10, "age": 20, "year": 2018, "twoRelevantDecimals": 20.45, "noRelevantDecimals": 20 }'
+		loFoxJson.setProp("id", 10)			
+		loFoxJson.setProp("age", 20)
+		loFoxJson.setProp("year", 2018)
+		loFoxJson.setProp("twoRelevantDecimals", 20.450)
+		loFoxJson.setProp("noRelevantDecimals", 20.00)
+		ASSERT loFoxJson.getJson() == lcExpectedJson ;
+			MESSAGE 'SetProp_Number failed. Numbers should be added including only relevant decimals: ' + loFoxJson.getJson()
 	ENDFUNC
 	
 	FUNCTION Test_SetProp_String
-		TRY
-			loFoxJson = CREATEOBJECT('FoxJson')
+		loFoxJson = CREATEOBJECT('FoxJson')
 			
-			lcExpectedJson = '{ "name": "Robert", "city": "London", "country": "England" }'
+		lcExpectedJson = '{ "name": "Robert", "city": "London", "country": "England" }'
 			
-			loFoxJson.setProp("name", "Robert")			
-			loFoxJson.setProp("city", "London")
-			loFoxJson.setProp("country", "England")
+		loFoxJson.setProp("name", "Robert")			
+		loFoxJson.setProp("city", "London")
+		loFoxJson.setProp("country", "England")
 			
-			IF loFoxJson.getJson() != lcExpectedJson 
-				ERROR('SetProp_String failed: ' + loFoxJson.getJson())
-			ENDIF
-		CATCH
-			THROW
-		ENDTRY
+		ASSERT loFoxJson.getJson() == lcExpectedJson ;
+			MESSAGE 'SetProp_String failed: ' + loFoxJson.getJson()
 	ENDFUNC
 
 	FUNCTION Test_SetProp_FoxJsonObject
-		TRY
-			loFoxJsonCar = CREATEOBJECT('FoxJson')
-			loFoxJsonCar.setProp("model", "camaro")
-			loFoxJsonCar.setProp("year", 2017)
+		loFoxJsonCar = CREATEOBJECT('FoxJson')
+		loFoxJsonCar.setProp("model", "camaro")
+		loFoxJsonCar.setProp("year", 2017)
 			
-			loFoxJsonBike = CREATEOBJECT('FoxJson')
-			loFoxJsonBike.setProp("model", "R6")
-			loFoxJsonBike.setProp("year", 2016)
+		loFoxJsonBike = CREATEOBJECT('FoxJson')
+		loFoxJsonBike.setProp("model", "R6")
+		loFoxJsonBike.setProp("year", 2016)
 			
-			lcExpectedJson = '{ "car": { "model": "camaro", "year": 2017 }, "bike": { "model": "R6", "year": 2016 } }'
+		lcExpectedJson = '{ "car": { "model": "camaro", "year": 2017 }, "bike": { "model": "R6", "year": 2016 } }'
 			
-			loFoxJson = CREATEOBJECT('FoxJson')
-			loFoxJson.setProp("car", loFoxJsonCar)
-			loFoxJson.setProp("bike", loFoxJsonBike)
+		loFoxJson = CREATEOBJECT('FoxJson')
+		loFoxJson.setProp("car", loFoxJsonCar)
+		loFoxJson.setProp("bike", loFoxJsonBike)
 			
-			IF loFoxJson.getJson() != lcExpectedJson 
-				ERROR('SetProp_FoxJsonObject failed: ' + loFoxJson.getJson())
-			ENDIF
-			
-		CATCH
-			THROW
-		ENDTRY
+		ASSERT loFoxJson.getJson() == lcExpectedJson ;
+			MESSAGE 'SetProp_FoxJsonObject failed: ' + loFoxJson.getJson()
 	ENDFUNC
 
 	FUNCTION Test_SetProp_UnsupportedObject
-		TRY
-			loFoxJson = CREATEOBJECT('FoxJson')
-			loFoxJson.setProp("notSupported", CREATEOBJECT('Empty'))
+		loFoxJson = CREATEOBJECT('FoxJson')
+		loFoxJson.setProp("notSupported", CREATEOBJECT('Empty'))
 			
-			lcExpectedJson = '{ "notSupported": "null" }'
-			IF loFoxJson.getJson() != lcExpectedJson 
-				ERROR('SetProp_FoxJsonObject failed: ' + loFoxJson.getJson())
-			ENDIF
-		CATCH
-			THROW
-		ENDTRY
+		lcExpectedJson = '{ "notSupported": "null" }'
+		ASSERT loFoxJson.getJson() == lcExpectedJson ;
+			MESSAGE 'SetProp_FoxJsonObject failed: ' + loFoxJson.getJson()
 	ENDFUNC
 
 	FUNCTION Test_SetProp_No_Duplicates
-		TRY 
-			loFoxJson = CREATEOBJECT('FoxJson')
-			loFoxJson.setProp('propA', 1)
-			loFoxJson.setProp('propB', 'a')
-			loFoxJson.setProp('propA', 'A')
-			loFoxJson.setProp('propB', 2)
+		loFoxJson = CREATEOBJECT('FoxJson')
+		loFoxJson.setProp('propA', 1)
+		loFoxJson.setProp('propB', 'a')
+		loFoxJson.setProp('propA', 'A')
+		loFoxJson.setProp('propB', 2)
 			
-			lcExpectedJson = '{ "propA": "A", "propB": 2 }'
+		lcExpectedJson = '{ "propA": "A", "propB": 2 }'
 			
-			IF loFoxJson.getJson() != lcExpectedJson 
-				ERROR('Test_SetProp_No_Duplicates failed: ' + loFoxJson.getJson() + ' should be equals to ' + lcExpectedJson)
-			ENDIF
-		CATCH
-			THROW
-		ENDTRY
+		ASSERT loFoxJson.getJson() == lcExpectedJson ;
+			MESSAGE 'Test_SetProp_No_Duplicates failed: ' + loFoxJson.getJson() + ' should be equals to ' + lcExpectedJson
 	ENDFUNC
 ENDDEFINE
 
