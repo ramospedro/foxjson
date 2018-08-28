@@ -13,7 +13,7 @@ Use the method `setProp(propName, value)` to add (or set) the desired properties
     loCatJson.setProp('name', 'Fred')
     loCatJson.setProp('age', 2)
 
-You can even add another **FoxJson** object as a prop.
+You can even add objects, such as **Collection** and **FoxJson** objects as props.
 
     loKidJson = FoxJson()
     loKidJson.setProp('name', 'John')
@@ -29,6 +29,7 @@ Getting the JSON string is just as easy a `getJson()` call.
 - Number
 - String
 - FoxJson Object
+- Collection
 
 ## Testing
 

@@ -29,14 +29,34 @@ DEFINE CLASS FoxJson as Custom
 				RETURN '"' + pvValue + '"'
 			CASE VARTYPE(pvValue) == 'O'
 				TRY
-					lcValue = pvValue.getJson()
+					lcClass = LOWER(pvValue.class)
 				CATCH
-					lcValue = '"null"'
+					lcClass = ''
 				ENDTRY
-				RETURN lcValue
+				
+				DO CASE
+					CASE lcClass == 'collection'
+						RETURN this.parseCollection(pvValue)
+					CASE lcClass == 'foxjson'
+						RETURN pvValue.getJson()
+					OTHERWISE
+						RETURN '"null"'
+					ENDCASE
 			OTHERWISE
 				RETURN '"null"'
 		ENDCASE
+	ENDFUNC
+	
+	FUNCTION parseCollection(poCol)
+		lcArray = '['
+		FOR EACH lvValue IN poCol
+			lcArray = lcArray + this.parseValue(lvValue) + ', '
+		ENDFOR
+		IF LEN(lcArray) > 1
+			lcArray = LEFT(lcArray, LEN(lcArray) - 2)
+		ENDIF
+		lcArray = lcArray + ']'
+		RETURN lcArray
 	ENDFUNC
 	
 	FUNCTION setProp(pcField, pvValue)
@@ -55,13 +75,14 @@ DEFINE CLASS FoxJson as Custom
 		
 		IF plTesting AND SET("Asserts") == 'ON'
 			this.Test_ParseValue()
+			this.Test_ParseValue_Collection()
 			this.Test_Initial_Json_Empty()
 			this.Test_SetProp_Number()
 			this.Test_SetProp_String()
 			this.Test_SetProp_FoxJsonObject()
 			this.Test_SetProp_UnsupportedObject()
 			this.Test_SetProp_No_Duplicates()
-			
+			this.Test_SetProp_Collection()
 			MESSAGEBOX('All tests passed!')
 		ENDIF
 	ENDPROC
@@ -90,12 +111,35 @@ DEFINE CLASS FoxJson as Custom
 		loFoxJsonObj.setProp("name", "test")
 		loExpectedJsonObjectValue = '{ "name": "test" }'
 		ASSERT loFoxJson.parseValue(loFoxJsonObj) == loExpectedJsonObjectValue ;
-			MESSAGE 'Parse value should parse FoxJsonObjects: ' + '{ "name": "test" }' + ' should be equal to '+ loFoxJson.parseValue(loFoxJsonObj)
+			MESSAGE 'Parse value should parse FoxJsonObjects: ' + loFoxJson.parseValue(loFoxJsonObj) + ' should be equal to '+ '{ "name": "test" }'
 			
 		lcExpectedNullValue = '"null"'
 		ASSERT loFoxJson.parseValue(CREATEOBJECT('Empty')) == lcExpectedNullValue ;
 			MESSAGE 'Parse value should parse unsupported types into null values'
-				
+	ENDFUNC
+	
+	FUNCTION Test_ParseValue_Collection
+		loFoxJson = CREATEOBJECT('FoxJson')
+		
+		loEmpty = CREATEOBJECT('Collection')
+		lcExpectedEmptyArrayValue = '[]'
+		lcEmptyParsedArray = loFoxJson.parseValue(loEmpty)
+		ASSERT lcEmptyParsedArray == lcExpectedEmptyArrayValue ;
+			MESSAGE 'Test_ParseValue_Collection with empty collection falied: ' + lcEmptyParsedArray + ' should be equal to ' + lcExpectedEmptyArrayValue
+			
+		loCol = CREATEOBJECT('Collection')
+		loCol.add(10)
+		loCol.add('A')
+		loJsonPerson = FoxJson()
+		loJsonPerson.setProp('name', 'John')
+		loJson = FoxJson()
+		loJson.setProp('id', 12345)
+		loJson.setProp('person', loJsonPerson)
+		loCol.add(loJson)
+		lcExpectedArrayValue = '[10, "A", { "id": 12345, "person": { "name": "John" } }]'
+		lcParsedArray = loFoxJson.parseValue(loCol)
+		ASSERT lcParsedArray == lcExpectedArrayValue ;
+			MESSAGE 'Test_ParseValue_Collection failed: ' + lcParsedArray + ' should be equal to ' + lcExpectedArrayValue
 	ENDFUNC
 	
 	FUNCTION Test_Initial_Json_Empty
@@ -171,5 +215,45 @@ DEFINE CLASS FoxJson as Custom
 		ASSERT loFoxJson.getJson() == lcExpectedJson ;
 			MESSAGE 'Test_SetProp_No_Duplicates failed: ' + loFoxJson.getJson() + ' should be equals to ' + lcExpectedJson
 	ENDFUNC
+	
+	FUNCTION Test_SetProp_Collection
+		loFoxJson = CREATEOBJECT('FoxJson')
+		
+		loCarATiresList = CREATEOBJECT('Collection')
+		loCarATiresList.add('FR')
+		loCarATiresList.add('FL')
+		loCarATiresList.add('RR')
+		loCarATiresList.add('RL')
+		loCarATiresPart = CREATEOBJECT('FoxJson')
+		loCarATiresPart.setProp('partName', 'tires')
+		loCarATiresPart.setProp('value', loCarATiresList)
+		
+		loCarAMirrorPart = CREATEOBJECT('FoxJson')
+		loCarAMirrorPart.setProp('partName', 'mirror')
+		loCarAMirrorPart.setProp('value', 'Cool Mirror X')
+		
+		loCarAParts = CREATEOBJECT('Collection')
+		loCarAParts.add(loCarATiresPart)
+		loCarAParts.add(loCarAMirrorPart)
+		
+		loCarA = FoxJson()
+		loCarA.setProp('model', 'XYZ')
+		loCarA.setProp('parts', loCarAParts)
+		
+		loCarB = FoxJson()
+		loCarB.setProp('model', 'ABC')
+		
+		loCars = CREATEOBJECT('Collection')
+		loCars.add(loCarA)
+		loCars.add(loCarB)
+		
+		loCarsJson = CREATEOBJECT('FoxJson')
+		loCarsJson.setProp('cars', loCars)
+		lcExpectedJsonValue = '{ "cars": [{ "model": "XYZ", "parts": [{ "partName": "tires", "value": ["FR", "FL", "RR", "RL"] }, { "partName": "mirror", "value": "Cool Mirror X" }] }, { "model": "ABC" }] }'
+		lcJsonString = loCarsJson.getJson()
+		ASSERT lcJsonString == lcExpectedJsonValue ;
+			MESSAGE 'Test_SetProp_Collection falied: ' + lcJsonString + ' should be equal to ' + lcExpectedJsonValue
+	ENDFUNC
+
 ENDDEFINE
 
