@@ -82,7 +82,7 @@ DEFINE CLASS FoxJson as Custom
 			this.Test_SetProp_FoxJsonObject()
 			this.Test_SetProp_UnsupportedObject()
 			this.Test_SetProp_No_Duplicates()
-			
+			this.Test_SetProp_Collection()
 			MESSAGEBOX('All tests passed!')
 		ENDIF
 	ENDPROC
@@ -214,6 +214,45 @@ DEFINE CLASS FoxJson as Custom
 			
 		ASSERT loFoxJson.getJson() == lcExpectedJson ;
 			MESSAGE 'Test_SetProp_No_Duplicates failed: ' + loFoxJson.getJson() + ' should be equals to ' + lcExpectedJson
+	ENDFUNC
+	
+	FUNCTION Test_SetProp_Collection
+		loFoxJson = CREATEOBJECT('FoxJson')
+		
+		loCarATiresList = CREATEOBJECT('Collection')
+		loCarATiresList.add('FR')
+		loCarATiresList.add('FL')
+		loCarATiresList.add('RR')
+		loCarATiresList.add('RL')
+		loCarATiresPart = CREATEOBJECT('FoxJson')
+		loCarATiresPart.setProp('partName', 'tires')
+		loCarATiresPart.setProp('value', loCarATiresList)
+		
+		loCarAMirrorPart = CREATEOBJECT('FoxJson')
+		loCarAMirrorPart.setProp('partName', 'mirror')
+		loCarAMirrorPart.setProp('value', 'Cool Mirror X')
+		
+		loCarAParts = CREATEOBJECT('Collection')
+		loCarAParts.add(loCarATiresPart)
+		loCarAParts.add(loCarAMirrorPart)
+		
+		loCarA = FoxJson()
+		loCarA.setProp('model', 'XYZ')
+		loCarA.setProp('parts', loCarAParts)
+		
+		loCarB = FoxJson()
+		loCarB.setProp('model', 'ABC')
+		
+		loCars = CREATEOBJECT('Collection')
+		loCars.add(loCarA)
+		loCars.add(loCarB)
+		
+		loCarsJson = CREATEOBJECT('FoxJson')
+		loCarsJson.setProp('cars', loCars)
+		lcExpectedJsonValue = '{ "cars": [{ "model": "XYZ", "parts": [{ "partName": "tires", "value": ["FR", "FL", "RR", "RL"] }, { "partName": "mirror", "value": "Cool Mirror X" }] }, { "model": "ABC" }] }'
+		lcJsonString = loCarsJson.getJson()
+		ASSERT lcJsonString == lcExpectedJsonValue ;
+			MESSAGE 'Test_SetProp_Collection falied: ' + lcJsonString + ' should be equal to ' + lcExpectedJsonValue
 	ENDFUNC
 
 ENDDEFINE
