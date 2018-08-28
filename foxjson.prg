@@ -36,7 +36,7 @@ DEFINE CLASS FoxJson as Custom
 				
 				DO CASE
 					CASE lcClass == 'collection'
-						RETURN '[]'
+						RETURN this.parseCollection(pvValue)
 					CASE lcClass == 'foxjson'
 						RETURN pvValue.getJson()
 					OTHERWISE
@@ -45,6 +45,18 @@ DEFINE CLASS FoxJson as Custom
 			OTHERWISE
 				RETURN '"null"'
 		ENDCASE
+	ENDFUNC
+	
+	FUNCTION parseCollection(poCol)
+		lcArray = '['
+		FOR EACH lvValue IN poCol
+			lcArray = lcArray + this.parseValue(lvValue) + ', '
+		ENDFOR
+		IF LEN(lcArray) > 1
+			lcArray = LEFT(lcArray, LEN(lcArray) - 2)
+		ENDIF
+		lcArray = lcArray + ']'
+		RETURN lcArray
 	ENDFUNC
 	
 	FUNCTION setProp(pcField, pvValue)
@@ -124,7 +136,7 @@ DEFINE CLASS FoxJson as Custom
 		loJson.setProp('id', 12345)
 		loJson.setProp('person', loJsonPerson)
 		loCol.add(loJson)
-		lcExpectedArrayValue = '[10, "A", { "person": { "id": 12345, "name": "John" } }]'
+		lcExpectedArrayValue = '[10, "A", { "id": 12345, "person": { "name": "John" } }]'
 		lcParsedArray = loFoxJson.parseValue(loCol)
 		ASSERT lcParsedArray == lcExpectedArrayValue ;
 			MESSAGE 'Test_ParseValue_Collection failed: ' + lcParsedArray + ' should be equal to ' + lcExpectedArrayValue
