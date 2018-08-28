@@ -29,11 +29,19 @@ DEFINE CLASS FoxJson as Custom
 				RETURN '"' + pvValue + '"'
 			CASE VARTYPE(pvValue) == 'O'
 				TRY
-					lcValue = pvValue.getJson()
+					lcClass = LOWER(pvValue.class)
 				CATCH
-					lcValue = '"null"'
+					lcClass = ''
 				ENDTRY
-				RETURN lcValue
+				
+				DO CASE
+					CASE lcClass == 'collection'
+						RETURN '[]'
+					CASE lcClass == 'foxjson'
+						RETURN pvValue.getJson()
+					OTHERWISE
+						RETURN '"null"'
+					ENDCASE
 			OTHERWISE
 				RETURN '"null"'
 		ENDCASE
@@ -55,6 +63,7 @@ DEFINE CLASS FoxJson as Custom
 		
 		IF plTesting AND SET("Asserts") == 'ON'
 			this.Test_ParseValue()
+			this.Test_ParseValue_Collection()
 			this.Test_Initial_Json_Empty()
 			this.Test_SetProp_Number()
 			this.Test_SetProp_String()
@@ -90,12 +99,35 @@ DEFINE CLASS FoxJson as Custom
 		loFoxJsonObj.setProp("name", "test")
 		loExpectedJsonObjectValue = '{ "name": "test" }'
 		ASSERT loFoxJson.parseValue(loFoxJsonObj) == loExpectedJsonObjectValue ;
-			MESSAGE 'Parse value should parse FoxJsonObjects: ' + '{ "name": "test" }' + ' should be equal to '+ loFoxJson.parseValue(loFoxJsonObj)
+			MESSAGE 'Parse value should parse FoxJsonObjects: ' + loFoxJson.parseValue(loFoxJsonObj) + ' should be equal to '+ '{ "name": "test" }'
 			
 		lcExpectedNullValue = '"null"'
 		ASSERT loFoxJson.parseValue(CREATEOBJECT('Empty')) == lcExpectedNullValue ;
 			MESSAGE 'Parse value should parse unsupported types into null values'
-				
+	ENDFUNC
+	
+	FUNCTION Test_ParseValue_Collection
+		loFoxJson = CREATEOBJECT('FoxJson')
+		
+		loEmpty = CREATEOBJECT('Collection')
+		lcExpectedEmptyArrayValue = '[]'
+		lcEmptyParsedArray = loFoxJson.parseValue(loEmpty)
+		ASSERT lcEmptyParsedArray == lcExpectedEmptyArrayValue ;
+			MESSAGE 'Test_ParseValue_Collection with empty collection falied: ' + lcEmptyParsedArray + ' should be equal to ' + lcExpectedEmptyArrayValue
+			
+		loCol = CREATEOBJECT('Collection')
+		loCol.add(10)
+		loCol.add('A')
+		loJsonPerson = FoxJson()
+		loJsonPerson.setProp('name', 'John')
+		loJson = FoxJson()
+		loJson.setProp('id', 12345)
+		loJson.setProp('person', loJsonPerson)
+		loCol.add(loJson)
+		lcExpectedArrayValue = '[10, "A", { "person": { "id": 12345, "name": "John" } }]'
+		lcParsedArray = loFoxJson.parseValue(loCol)
+		ASSERT lcParsedArray == lcExpectedArrayValue ;
+			MESSAGE 'Test_ParseValue_Collection failed: ' + lcParsedArray + ' should be equal to ' + lcExpectedArrayValue
 	ENDFUNC
 	
 	FUNCTION Test_Initial_Json_Empty
@@ -171,5 +203,6 @@ DEFINE CLASS FoxJson as Custom
 		ASSERT loFoxJson.getJson() == lcExpectedJson ;
 			MESSAGE 'Test_SetProp_No_Duplicates failed: ' + loFoxJson.getJson() + ' should be equals to ' + lcExpectedJson
 	ENDFUNC
+
 ENDDEFINE
 
